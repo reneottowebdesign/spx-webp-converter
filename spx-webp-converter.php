@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SPX - Webp Converter
  * Description: Konvertiert JPEG/PNG-Uploads automatisch in WebP und erlaubt WebP-Uploads.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: René Otto
  * License: GPLv2 or later
  * Text Domain: spx-webp-converter
@@ -301,36 +301,28 @@ function spx_webp_converter_convert_image_to_webp_on_upload($upload)
         return $upload;
     }
 
-    // Resize if exceeding configured max dimensions (scale down preserving aspect ratio).
+    // One-pass proportional resize (best fit inside max constraints).
     $max_w = spx_webp_converter_get_max_width();
     $max_h = spx_webp_converter_get_max_height();
     if (($max_w > 0 || $max_h > 0) && $width > 0 && $height > 0) {
-        $target_w = $width;
-        $target_h = $height;
-        if ($max_w > 0 && $target_w > $max_w) {
-            $ratio = $max_w / $target_w;
-            $target_w = $max_w;
-            $target_h = (int) round($target_h * $ratio);
-        }
-        if ($max_h > 0 && $target_h > $max_h) {
-            $ratio = $max_h / $target_h;
-            $target_h = $max_h;
-            $target_w = (int) round($target_w * $ratio);
-        }
-        if ($target_w > 0 && $target_h > 0 && ($target_w !== $width || $target_h !== $height)) {
+        $scale_w = $max_w > 0 ? ($max_w / $width) : 1;
+        $scale_h = $max_h > 0 ? ($max_h / $height) : 1;
+        $scale   = min($scale_w, $scale_h, 1); // never upscale
+        if ($scale < 1) {
+            $target_w = (int) max(1, round($width * $scale));
+            $target_h = (int) max(1, round($height * $scale));
             $resized = imagecreatetruecolor($target_w, $target_h);
-            // Preserve alpha.
             imagealphablending($resized, false);
             imagesavealpha($resized, true);
             $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
             imagefill($resized, 0, 0, $transparent);
             if (imagecopyresampled($resized, $image, 0, 0, 0, 0, $target_w, $target_h, $width, $height)) {
                 imagedestroy($image);
-                $image = $resized;
-                $width = $target_w;
+                $image  = $resized;
+                $width  = $target_w;
                 $height = $target_h;
             } else {
-                imagedestroy($resized); // fall back to original size on failure
+                imagedestroy($resized);
             }
         }
     }
