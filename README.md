@@ -26,8 +26,12 @@ Yes, after successful conversion, the original JPEG/PNG file is removed.
 Your server must support the GD library with WebP support (PHP >= 7.0 recommended).
 
 ## Changelog
-### 1.0.0
-* Initial release
+### Unreleased
+* docs: convert readme to Markdown and remove legacy readme.txt (1ab7438)
+
+### 1.0.0 – 2025-08-19
+* Initializes WebP conversion plugin (2bdf55d)
+* Initial commit (d91eb93)
 
 ## Upgrade Notice
 ### 1.0.0
