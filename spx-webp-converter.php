@@ -248,20 +248,14 @@ function spx_webp_converter_convert_image_to_webp_on_upload($upload)
 
     // Optional memory safety check (approximate): width * height * 5 bytes.
     $dimensions = @getimagesize($file_path);
+    $width = $height = 0;
     if (is_array($dimensions) && isset($dimensions[0], $dimensions[1])) {
         $width  = (int) $dimensions[0];
         $height = (int) $dimensions[1];
-        // Respect admin-configured max dimensions (skip conversion if exceeding limits).
-        $max_w = spx_webp_converter_get_max_width();
-        $max_h = spx_webp_converter_get_max_height();
-        if (($max_w > 0 && $width > $max_w) || ($max_h > 0 && $height > $max_h)) {
-            return $upload; // Skip large images.
-        }
-
-        $estimated = $width * $height * 5; // generous per-pixel multiplier.
+        $estimated = $width * $height * 5; // generous per-pixel multiplier for memory estimate.
         if (function_exists('wp_convert_hr_to_bytes')) {
             $limit = wp_convert_hr_to_bytes(ini_get('memory_limit'));
-            if ($limit > 0 && $estimated > ($limit * 0.6)) { // exceed 60% of limit – skip.
+            if ($limit > 0 && $estimated > ($limit * 0.8)) { // exceed 80% of limit – bail to avoid fatal.
                 return $upload;
             }
         }
@@ -307,29 +301,60 @@ function spx_webp_converter_convert_image_to_webp_on_upload($upload)
         return $upload;
     }
 
+    // Resize if exceeding configured max dimensions (scale down preserving aspect ratio).
+    $max_w = spx_webp_converter_get_max_width();
+    $max_h = spx_webp_converter_get_max_height();
+    if (($max_w > 0 || $max_h > 0) && $width > 0 && $height > 0) {
+        $target_w = $width;
+        $target_h = $height;
+        if ($max_w > 0 && $target_w > $max_w) {
+            $ratio = $max_w / $target_w;
+            $target_w = $max_w;
+            $target_h = (int) round($target_h * $ratio);
+        }
+        if ($max_h > 0 && $target_h > $max_h) {
+            $ratio = $max_h / $target_h;
+            $target_h = $max_h;
+            $target_w = (int) round($target_w * $ratio);
+        }
+        if ($target_w > 0 && $target_h > 0 && ($target_w !== $width || $target_h !== $height)) {
+            $resized = imagecreatetruecolor($target_w, $target_h);
+            // Preserve alpha.
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+            imagefill($resized, 0, 0, $transparent);
+            if (imagecopyresampled($resized, $image, 0, 0, 0, 0, $target_w, $target_h, $width, $height)) {
+                imagedestroy($image);
+                $image = $resized;
+                $width = $target_w;
+                $height = $target_h;
+            } else {
+                imagedestroy($resized); // fall back to original size on failure
+            }
+        }
+    }
+
     // Write WebP with quality 80; ensure directory writable.
     if (!is_writable($file_info['dirname'])) {
         imagedestroy($image);
         return $upload;
     }
 
-    $success = imagewebp($image, $webp_path, spx_webp_converter_get_quality());
+    $quality = (int) apply_filters('spx_webp_converter_quality', spx_webp_converter_get_quality());
+    $success = imagewebp($image, $webp_path, $quality);
     imagedestroy($image);
     if (!$success || !file_exists($webp_path)) {
         return $upload; // Keep original on failure.
     }
 
-    // Only delete original if new file smaller (safety + disk usage win).
-    $orig_size = filesize($file_path) ?: 0;
-    $webp_size = filesize($webp_path) ?: PHP_INT_MAX;
-    if ($webp_size < $orig_size && is_writable($file_path)) {
+    // Always replace original now for consistency; optionally keep original via filter.
+    $replace = (bool) apply_filters('spx_webp_converter_replace_original', true, $file_path, $webp_path);
+    if ($replace && is_writable($file_path)) {
         @unlink($file_path);
         $upload['file'] = $webp_path;
         $upload['url']  = preg_replace('/\.' . preg_quote($file_info['extension'], '/') . '$/i', '.webp', $upload['url']);
         $upload['type'] = 'image/webp';
-    } else {
-        // If WebP is larger, keep original and remove generated WebP to avoid clutter.
-        @unlink($webp_path);
     }
 
     return $upload;
