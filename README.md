@@ -27,9 +27,12 @@ Your server must support the GD library with WebP support (PHP >= 7.0 recommende
 
 ## Changelog
 ### Unreleased
-* docs: convert readme to Markdown and remove legacy readme.txt (1ab7438)
+* (none)
 
 ### 1.0.0 – 2025-08-19
+* Converts uploads to WebP and allows WebP uploads (4dabede)
+* docs(changelog): add commit history entries (c4617cd)
+* docs: convert readme to Markdown and remove legacy readme.txt (1ab7438)
 * Initializes WebP conversion plugin (2bdf55d)
 * Initial commit (d91eb93)
 
