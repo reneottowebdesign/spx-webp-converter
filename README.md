@@ -4,7 +4,7 @@
 **Tags:** webp, image, converter, uploads, optimization
 **Requires at least:** 5.0
 **Tested up to:** 6.5
-**Stable tag:** 1.0.0
+**Stable tag:** 1.1.0
 **License:** GPLv2 or later
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -28,6 +28,9 @@ Your server must support the GD library with WebP support (PHP >= 7.0 recommende
 ## Changelog
 ### Unreleased
 * (none)
+
+### 1.1.0 – 2025-08-19
+* feat: add admin settings for quality and max dimensions (f23c9ae)
 
 ### 1.0.0 – 2025-08-19
 * Converts uploads to WebP and allows WebP uploads (4dabede)
