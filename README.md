@@ -4,7 +4,7 @@
 **Tags:** webp, image, converter, uploads, optimization
 **Requires at least:** 5.0
 **Tested up to:** 6.5
-**Stable tag:** 1.1.2
+**Stable tag:** 1.1.3
 **License:** GPLv2 or later
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -28,6 +28,9 @@ Your server must support the GD library with WebP support (PHP >= 7.0 recommende
 ## Changelog
 ### Unreleased
 * (none)
+
+### 1.1.3 – 2025-08-19
+* style: code style / formatting (PSR/WP standards) in helpers, admin, converter
 
 ### 1.1.2 – 2025-08-19
 * refactor: split code into modular includes (helpers/admin/converter)

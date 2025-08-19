@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SPX - Webp Converter
  * Description: Konvertiert JPEG/PNG-Uploads automatisch in WebP und erlaubt WebP-Uploads.
- * Version: 1.1.2
+ * Version: 1.1.3
  * Author: René Otto
  * License: GPLv2 or later
  * Text Domain: spx-webp-converter

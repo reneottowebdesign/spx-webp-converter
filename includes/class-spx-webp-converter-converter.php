@@ -1,35 +1,52 @@
 <?php
+
 /**
  * Conversion logic extracted into class.
  */
 
-if (!defined('ABSPATH')) { exit; }
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-class SPX_WebP_Converter_Converter {
+class SPX_WebP_Converter_Converter
+{
     /**
      * Hook callback for wp_handle_upload.
      * @param array $upload
      * @return array
      */
-    public static function convert_upload(array $upload): array {
+    public static function convert_upload(array $upload): array
+    {
         if (!is_array($upload) || empty($upload['file']) || empty($upload['type']) || empty($upload['url'])) {
             return $upload;
         }
-        $allowed = ['image/jpeg','image/png'];
-        if (!in_array($upload['type'], $allowed, true)) { return $upload; }
+        $allowed = ['image/jpeg', 'image/png'];
+        if (!in_array($upload['type'], $allowed, true)) {
+            return $upload;
+        }
         $file_path = $upload['file'];
-        if (!is_string($file_path) || !file_exists($file_path) || !is_readable($file_path)) { return $upload; }
+        if (!is_string($file_path) || !file_exists($file_path) || !is_readable($file_path)) {
+            return $upload;
+        }
 
         $wp_check = wp_check_filetype_and_ext($file_path, basename($file_path));
-        if (!empty($wp_check['ext']) && !empty($wp_check['type']) && !in_array($wp_check['type'], $allowed, true)) { return $upload; }
+        if (!empty($wp_check['ext']) && !empty($wp_check['type']) && !in_array($wp_check['type'], $allowed, true)) {
+            return $upload;
+        }
 
         $uploads_dir = wp_get_upload_dir();
-        if (empty($uploads_dir['basedir']) || strpos(realpath($file_path) ?: '', realpath($uploads_dir['basedir']) ?: '') !== 0) { return $upload; }
+        if (empty($uploads_dir['basedir']) || strpos(realpath($file_path) ?: '', realpath($uploads_dir['basedir']) ?: '') !== 0) {
+            return $upload;
+        }
 
         $info = pathinfo($file_path);
-        if (empty($info['dirname']) || empty($info['filename']) || empty($info['extension'])) { return $upload; }
+        if (empty($info['dirname']) || empty($info['filename']) || empty($info['extension'])) {
+            return $upload;
+        }
         $webp_path = $info['dirname'] . '/' . $info['filename'] . '.webp';
-        if (file_exists($webp_path)) { return $upload; }
+        if (file_exists($webp_path)) {
+            return $upload;
+        }
 
         $dimensions = @getimagesize($file_path);
         $width = $height = 0;
@@ -39,7 +56,9 @@ class SPX_WebP_Converter_Converter {
             $estimated = $width * $height * 5;
             if (function_exists('wp_convert_hr_to_bytes')) {
                 $limit = wp_convert_hr_to_bytes(ini_get('memory_limit'));
-                if ($limit > 0 && $estimated > ($limit * 0.8)) { return $upload; }
+                if ($limit > 0 && $estimated > ($limit * 0.8)) {
+                    return $upload;
+                }
             }
         }
 
@@ -50,23 +69,33 @@ class SPX_WebP_Converter_Converter {
                 $exif = @exif_read_data($file_path);
                 if (isset($exif['Orientation'])) {
                     switch ((int)$exif['Orientation']) {
-                        case 3: $image = imagerotate($image, 180, 0); break;
-                        case 6: $image = imagerotate($image, -90, 0); break;
-                        case 8: $image = imagerotate($image, 90, 0); break;
+                        case 3:
+                            $image = imagerotate($image, 180, 0);
+                            break;
+                        case 6:
+                            $image = imagerotate($image, -90, 0);
+                            break;
+                        case 8:
+                            $image = imagerotate($image, 90, 0);
+                            break;
                     }
                 }
             }
         } elseif ($upload['type'] === 'image/png') {
             $image = imagecreatefrompng($file_path);
             if ($image) {
-                if (function_exists('imagepalettetotruecolor')) { @imagepalettetotruecolor($image); }
+                if (function_exists('imagepalettetotruecolor')) {
+                    @imagepalettetotruecolor($image);
+                }
                 imagealphablending($image, true);
                 imagesavealpha($image, true);
             }
         }
 
         if (!$image || !function_exists('imagewebp')) {
-            if (is_resource($image) || $image instanceof GdImage) { imagedestroy($image); }
+            if (is_resource($image) || $image instanceof GdImage) {
+                imagedestroy($image);
+            }
             return $upload;
         }
 
@@ -81,19 +110,31 @@ class SPX_WebP_Converter_Converter {
                 $target_w = (int) max(1, round($width * $scale));
                 $target_h = (int) max(1, round($height * $scale));
                 $resized = imagecreatetruecolor($target_w, $target_h);
-                imagealphablending($resized, false); imagesavealpha($resized, true);
-                $transparent = imagecolorallocatealpha($resized, 0,0,0,127); imagefill($resized,0,0,$transparent);
-                if (imagecopyresampled($resized, $image,0,0,0,0,$target_w,$target_h,$width,$height)) {
-                    imagedestroy($image); $image = $resized; $width=$target_w; $height=$target_h;
-                } else { imagedestroy($resized); }
+                imagealphablending($resized, false);
+                imagesavealpha($resized, true);
+                $transparent = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+                imagefill($resized, 0, 0, $transparent);
+                if (imagecopyresampled($resized, $image, 0, 0, 0, 0, $target_w, $target_h, $width, $height)) {
+                    imagedestroy($image);
+                    $image = $resized;
+                    $width = $target_w;
+                    $height = $target_h;
+                } else {
+                    imagedestroy($resized);
+                }
             }
         }
 
-        if (!is_writable($info['dirname'])) { imagedestroy($image); return $upload; }
+        if (!is_writable($info['dirname'])) {
+            imagedestroy($image);
+            return $upload;
+        }
         $quality = (int) apply_filters('spx_webp_converter_quality', spx_webp_converter_get_quality());
         $success = imagewebp($image, $webp_path, $quality);
         imagedestroy($image);
-        if (!$success || !file_exists($webp_path)) { return $upload; }
+        if (!$success || !file_exists($webp_path)) {
+            return $upload;
+        }
 
         $replace = (bool) apply_filters('spx_webp_converter_replace_original', true, $file_path, $webp_path);
         if ($replace && is_writable($file_path)) {

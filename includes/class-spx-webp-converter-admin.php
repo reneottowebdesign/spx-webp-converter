@@ -1,17 +1,23 @@
 <?php
+
 /**
  * Admin settings handling for SPX WebP Converter.
  */
 
-if (!defined('ABSPATH')) { exit; }
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-class SPX_WebP_Converter_Admin {
-    public static function init(): void {
+class SPX_WebP_Converter_Admin
+{
+    public static function init(): void
+    {
         add_action('admin_init', [__CLASS__, 'register_settings']);
         add_action('admin_menu', [__CLASS__, 'add_settings_page']);
     }
 
-    public static function register_settings(): void {
+    public static function register_settings(): void
+    {
         register_setting(
             'spx_webp_converter_settings',
             'spx_webp_converter_quality',
@@ -22,7 +28,7 @@ class SPX_WebP_Converter_Admin {
             ]
         );
 
-        foreach (['width','height'] as $axis) {
+        foreach (['width', 'height'] as $axis) {
             register_setting(
                 'spx_webp_converter_settings',
                 'spx_webp_converter_max_' . $axis,
@@ -74,7 +80,8 @@ class SPX_WebP_Converter_Admin {
         );
     }
 
-    public static function add_settings_page(): void {
+    public static function add_settings_page(): void
+    {
         add_options_page(
             __('SPX WebP Converter', 'spx-webp-converter'),
             __('SPX WebP Converter', 'spx-webp-converter'),
@@ -84,7 +91,8 @@ class SPX_WebP_Converter_Admin {
         );
     }
 
-    public static function render_settings_page(): void {
+    public static function render_settings_page(): void
+    {
         if (!current_user_can('manage_options')) {
             wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'spx-webp-converter'));
         }
@@ -98,13 +106,19 @@ class SPX_WebP_Converter_Admin {
         echo '</div>';
     }
 
-    public static function sanitize_quality($value): int {
+    public static function sanitize_quality($value): int
+    {
         $value = (int) $value;
-        if ($value < 0) { $value = 0; } elseif ($value > 100) { $value = 100; }
+        if ($value < 0) {
+            $value = 0;
+        } elseif ($value > 100) {
+            $value = 100;
+        }
         return $value;
     }
 
-    public static function sanitize_dimension($value): int {
+    public static function sanitize_dimension($value): int
+    {
         $value = (int) $value;
         return $value < 0 ? 0 : $value;
     }
