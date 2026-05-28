@@ -22,9 +22,10 @@ class SPX_WebP_Converter_Admin
             'spx_webp_converter_settings',
             'spx_webp_converter_quality',
             [
-                'type' => 'integer',
+                'type'              => 'integer',
                 'sanitize_callback' => [__CLASS__, 'sanitize_quality'],
-                'default' => 80,
+                'default'           => 80,
+                'show_in_rest'      => true,
             ]
         );
 
@@ -33,9 +34,10 @@ class SPX_WebP_Converter_Admin
                 'spx_webp_converter_settings',
                 'spx_webp_converter_max_' . $axis,
                 [
-                    'type' => 'integer',
+                    'type'              => 'integer',
                     'sanitize_callback' => [__CLASS__, 'sanitize_dimension'],
-                    'default' => 0,
+                    'default'           => 0,
+                    'show_in_rest'      => true,
                 ]
             );
         }

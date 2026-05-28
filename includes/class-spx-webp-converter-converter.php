@@ -35,7 +35,9 @@ class SPX_WebP_Converter_Converter
         }
 
         $uploads_dir = wp_get_upload_dir();
-        if (empty($uploads_dir['basedir']) || strpos(realpath($file_path) ?: '', realpath($uploads_dir['basedir']) ?: '') !== 0) {
+        $real_file   = realpath($file_path);
+        $real_base   = realpath($uploads_dir['basedir'] ?? '');
+        if (empty($uploads_dir['basedir']) || $real_base === false || $real_file === false || !str_starts_with($real_file, $real_base)) {
             return $upload;
         }
 
@@ -48,7 +50,7 @@ class SPX_WebP_Converter_Converter
             return $upload;
         }
 
-        $dimensions = @getimagesize($file_path);
+        $dimensions = getimagesize($file_path);
         $width = $height = 0;
         if (is_array($dimensions) && isset($dimensions[0], $dimensions[1])) {
             $width  = (int) $dimensions[0];
@@ -66,18 +68,23 @@ class SPX_WebP_Converter_Converter
         if ($upload['type'] === 'image/jpeg') {
             $image = imagecreatefromjpeg($file_path);
             if ($image && function_exists('exif_read_data') && is_readable($file_path)) {
-                $exif = @exif_read_data($file_path);
+                $exif = exif_read_data($file_path);
                 if (isset($exif['Orientation'])) {
+                    $rotated = false;
                     switch ((int)$exif['Orientation']) {
                         case 3:
-                            $image = imagerotate($image, 180, 0);
+                            $rotated = imagerotate($image, 180, 0);
                             break;
                         case 6:
-                            $image = imagerotate($image, -90, 0);
+                            $rotated = imagerotate($image, -90, 0);
                             break;
                         case 8:
-                            $image = imagerotate($image, 90, 0);
+                            $rotated = imagerotate($image, 90, 0);
                             break;
+                    }
+                    if ($rotated !== false) {
+                        imagedestroy($image);
+                        $image = $rotated;
                     }
                 }
             }
@@ -85,7 +92,7 @@ class SPX_WebP_Converter_Converter
             $image = imagecreatefrompng($file_path);
             if ($image) {
                 if (function_exists('imagepalettetotruecolor')) {
-                    @imagepalettetotruecolor($image);
+                    imagepalettetotruecolor($image);
                 }
                 imagealphablending($image, true);
                 imagesavealpha($image, true);
@@ -138,7 +145,7 @@ class SPX_WebP_Converter_Converter
 
         $replace = (bool) apply_filters('spx_webp_converter_replace_original', true, $file_path, $webp_path);
         if ($replace && is_writable($file_path)) {
-            @unlink($file_path);
+            unlink($file_path);
             $upload['file'] = $webp_path;
             $upload['url'] = preg_replace('/\.' . preg_quote($info['extension'], '/') . '$/i', '.webp', $upload['url']);
             $upload['type'] = 'image/webp';

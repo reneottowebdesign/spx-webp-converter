@@ -3,7 +3,10 @@
 /**
  * Plugin Name: SPX - Webp Converter
  * Description: Konvertiert JPEG/PNG-Uploads automatisch in WebP und erlaubt WebP-Uploads.
- * Version: 1.1.3
+ * Version: 1.1.4
+ * Requires at least: 6.0
+ * Requires PHP: 8.0
+ * Tested up to: 7.0
  * Author: René Otto
  * License: GPLv2 or later
  * Text Domain: spx-webp-converter
@@ -14,9 +17,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Define plugin path constant.
+// Define plugin path and version constants.
 if (!defined('SPX_WEBP_CONVERTER_PATH')) {
     define('SPX_WEBP_CONVERTER_PATH', plugin_dir_path(__FILE__));
+}
+if (!defined('SPX_WEBP_CONVERTER_VERSION')) {
+    define('SPX_WEBP_CONVERTER_VERSION', '1.1.4');
 }
 
 // Load textdomain.
