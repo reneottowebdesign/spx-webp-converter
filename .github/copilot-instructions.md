@@ -19,7 +19,8 @@
 ## Coding Standards
 - PHP 8.0+, strikte Typen (`declare(strict_types=1)` wo sinnvoll)
 - Kein `@`-Error-Suppressor – explizite Prüfungen bevorzugen
-- WordPress Coding Standards: Escaping (`esc_html`, `esc_attr`), Nonces bei Forms
+- Code-Style: PSR-2 (4 Spaces, Opening Brace auf neuer Zeile bei Klassen/Methoden)
+- WordPress Best Practices: Escaping (`esc_html`, `esc_attr`), Nonces bei Forms, kein Short-Array-Syntax `[]` → `array()`
 - Versionsnummer in Plugin-Header (`Version:`) UND in Konstante `SPX_WEBP_CONVERTER_VERSION` synchron halten
 
 ## Semantic Versioning (MAJOR.MINOR.PATCH)

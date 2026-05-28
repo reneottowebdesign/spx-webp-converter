@@ -13,20 +13,20 @@
  */
 
 // Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (! defined('ABSPATH')) {
+    exit;
 }
 
 // Define plugin path and version constants.
-if ( ! defined( 'SPX_WEBP_CONVERTER_PATH' ) ) {
-	define( 'SPX_WEBP_CONVERTER_PATH', plugin_dir_path( __FILE__ ) );
+if (! defined('SPX_WEBP_CONVERTER_PATH')) {
+    define('SPX_WEBP_CONVERTER_PATH', plugin_dir_path(__FILE__));
 }
-if ( ! defined( 'SPX_WEBP_CONVERTER_VERSION' ) ) {
-	define( 'SPX_WEBP_CONVERTER_VERSION', '1.1.4' );
+if (! defined('SPX_WEBP_CONVERTER_VERSION')) {
+    define('SPX_WEBP_CONVERTER_VERSION', '1.1.4');
 }
 
 // Load textdomain.
-add_action( 'plugins_loaded', 'spx_webp_converter_load_textdomain' );
+add_action('plugins_loaded', 'spx_webp_converter_load_textdomain');
 
 /**
  * Load plugin textdomain.
@@ -35,8 +35,9 @@ add_action( 'plugins_loaded', 'spx_webp_converter_load_textdomain' );
  * @access public
  * @return void
  */
-function spx_webp_converter_load_textdomain() {
-	load_plugin_textdomain( 'spx-webp-converter', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+function spx_webp_converter_load_textdomain()
+{
+    load_plugin_textdomain('spx-webp-converter', false, dirname(plugin_basename(__FILE__)) . '/languages');
 }
 
 // Require split include files.
@@ -45,8 +46,8 @@ require_once SPX_WEBP_CONVERTER_PATH . 'includes/class-spx-webp-converter-admin.
 require_once SPX_WEBP_CONVERTER_PATH . 'includes/class-spx-webp-converter-converter.php';
 
 // Initialize admin (only in backend).
-if ( is_admin() ) {
-	SPX_WebP_Converter_Admin::init();
+if (is_admin()) {
+    SPX_WebP_Converter_Admin::init();
 }
 
 /**
@@ -57,11 +58,12 @@ if ( is_admin() ) {
  * @param array $mimes Allowed mime types.
  * @return array Modified mime types.
  */
-function spx_webp_converter_allow_webp_uploads( $mimes ) {
-	$mimes['webp'] = 'image/webp';
-	return $mimes;
+function spx_webp_converter_allow_webp_uploads($mimes)
+{
+    $mimes['webp'] = 'image/webp';
+    return $mimes;
 }
-add_filter( 'upload_mimes', 'spx_webp_converter_allow_webp_uploads' );
+add_filter('upload_mimes', 'spx_webp_converter_allow_webp_uploads');
 
 // Register conversion filter via class wrapper.
-add_filter( 'wp_handle_upload', array( 'SPX_WebP_Converter_Converter', 'convert_upload' ) );
+add_filter('wp_handle_upload', array('SPX_WebP_Converter_Converter', 'convert_upload'));
