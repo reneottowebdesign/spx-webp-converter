@@ -2,9 +2,10 @@
 
 **Contributors:** René Otto
 **Tags:** webp, image, converter, uploads, optimization
-**Requires at least:** 5.0
-**Tested up to:** 6.5
-**Stable tag:** 1.1.3
+**Requires at least:** 6.0
+**Requires PHP:** 8.0
+**Tested up to:** 7.0
+**Stable tag:** 1.1.4
 **License:** GPLv2 or later
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -23,11 +24,16 @@ It converts JPEG and PNG uploads to WebP and allows WebP uploads in the media li
 Yes, after successful conversion, the original JPEG/PNG file is removed.
 
 **What are the requirements?**
-Your server must support the GD library with WebP support (PHP >= 7.0 recommended).
+Your server must support the GD library with WebP support. Requires PHP 8.0+ and WordPress 6.0+.
 
 ## Changelog
-### Unreleased
-* (none)
+### 1.1.4 – 2026-05-28
+* fix: check `imagerotate()` return value before reassigning image resource
+* fix: remove `@` error suppression (`getimagesize`, `exif_read_data`, `imagepalettetotruecolor`, `unlink`)
+* fix: replace `strpos` path traversal check with `str_starts_with()` (PHP 8.0+), validate `realpath()` results explicitly
+* feat: add `Requires at least`, `Requires PHP`, `Tested up to` to plugin header
+* feat: add `SPX_WEBP_CONVERTER_VERSION` constant
+* feat: add `show_in_rest` to all `register_setting()` calls (REST API / Block Editor)
 
 ### 1.1.3 – 2025-08-19
 * style: code style / formatting (PSR/WP standards) in helpers, admin, converter
@@ -50,5 +56,8 @@ Your server must support the GD library with WebP support (PHP >= 7.0 recommende
 * Initial commit (d91eb93)
 
 ## Upgrade Notice
+### 1.1.4
+Requires PHP 8.0+ and WordPress 6.0+. Improved code robustness and WordPress 7 compatibility.
+
 ### 1.0.0
 First release.
